@@ -11,6 +11,7 @@ source = files(
   'game/main.cpp',
   'motor/render.cpp',
   'motor/input.cpp',
+  'motor/timer.cpp',
   'motor/log.cpp'
 )
 
