@@ -4,11 +4,11 @@
 #include "input.hpp"
 #include "log.hpp"
 
-namespace ztd::input {
+namespace ztd {
 
 static HANDLE hin = INVALID_HANDLE_VALUE;
 
-void init()
+void input_init()
 {
   assert(hin == INVALID_HANDLE_VALUE);
 
@@ -17,30 +17,32 @@ void init()
     log_and_abort("[ INPUT ] init: failed get console handle");
 }
 
-Event get_event()
+bool InputEvent::get()
 {
+  assert(hin != INVALID_HANDLE_VALUE);
   DWORD n;
   GetNumberOfConsoleInputEvents(hin, &n);
   if (n > 0)
-    return get_event_hook();
-  return {};
+    return wait();
+  return false;
 }
 
-Event get_event_hook()
+bool InputEvent::wait()
 {
   assert(hin != INVALID_HANDLE_VALUE);
 
   INPUT_RECORD ir;
   DWORD read;
-  Event res;
 
   ReadConsoleInput(hin, &ir, 1, &read);
   if (ir.EventType == KEY_EVENT && ir.Event.KeyEvent.bKeyDown) {
-    res.ch   = ir.Event.KeyEvent.uChar.AsciiChar;
-    res.code = ir.Event.KeyEvent.wVirtualKeyCode;
+    ch   = ir.Event.KeyEvent.uChar.AsciiChar;
+    code = ir.Event.KeyEvent.wVirtualKeyCode;
   }
+  else
+    return false;
 
-  return res;
+  return true;
 }
 
 } /* namespace */

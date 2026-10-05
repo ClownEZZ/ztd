@@ -2,15 +2,17 @@
 
 #include "def.hpp"
 
-namespace ztd::input {
+namespace ztd {
 
-struct Event {
-  char ch   = 0;
-  u16  code = 0;
+struct InputEvent
+{
+  char ch;
+  u16  code;
+
+  bool get();
+  bool wait();
 };
 
-void  init();
-Event get_event();
-Event get_event_hook();
+void input_init();
 
 } /* namespace */
