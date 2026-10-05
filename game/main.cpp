@@ -1,13 +1,22 @@
-#include "../motor/render.hpp"
+#include <iostream>
+#include "../motor/input.hpp"
 
 int main()
 {
-  ztd::render::init();
+  ztd::input::init();
 
-  ztd::render::buf::clear('-');
-  ztd::render::buf::set(10, 10, '@');
-  ztd::render::buf::show();
+  ztd::input::Event event;
+  std::cout << "press 'q' to exit";
+  for (;;) {
+    //event = ztd::input::get_event();
+    event = ztd::input::get_event_hook();
+    std::cout << event.code << '\t';
+    if (event.ch >= ' ')
+      std::cout << '\'' << event.ch << '\'';
+    std::cout << '\n';
+    if (event.ch == 'q')
+      break;
+  }
 
-  ztd::render::deinit();
   return 0;
 }
