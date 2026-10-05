@@ -1,7 +1,13 @@
-#include "../motor/log.hpp"
+#include "../motor/render.hpp"
 
 int main()
 {
-  ztd::log("test");
+  ztd::render::init();
+
+  ztd::render::buf::clear('-');
+  ztd::render::buf::set(10, 10, '@');
+  ztd::render::buf::show();
+
+  ztd::render::deinit();
   return 0;
 }
