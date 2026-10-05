@@ -1,24 +1,20 @@
 #include <windows.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <new>
 
 #include "render.hpp"
 #include "log.hpp"
-#include "def.hpp"
 
-namespace ztd::render {
+namespace ztd {
 
-static HANDLE hout = INVALID_HANDLE_VALUE;
-static struct {
-  char *buf = nullptr;
-  u32   width;
-  u32   height;
-} screen;
+static HANDLE        hout   = INVALID_HANDLE_VALUE;
+static RenderBuffer *buffer = nullptr;
 
-void init()
+RenderBuffer *render_init()
 {
-  assert(hout == INVALID_HANDLE_VALUE);
-  assert(!screen.buf);
+  if (buffer)
+    return buffer;
 
   hout = GetStdHandle(STD_OUTPUT_HANDLE);
   if (hout == INVALID_HANDLE_VALUE)
@@ -27,56 +23,78 @@ void init()
   CONSOLE_SCREEN_BUFFER_INFO csbi;
   if (!GetConsoleScreenBufferInfo(hout, &csbi))
     log_and_abort("[ RENDER ] init: failed get console size");
-  screen.width  = csbi.srWindow.Right  - csbi.srWindow.Left + 1;
-  screen.height = csbi.srWindow.Bottom - csbi.srWindow.Top  + 1;
+  const u32 w = csbi.srWindow.Right  - csbi.srWindow.Left + 1;
+  const u32 h = csbi.srWindow.Bottom - csbi.srWindow.Top  + 1;
 
-  screen.buf = static_cast<char *>(malloc(screen.width * screen.height));
-  if (!screen.buf)
+  buffer = new(std::nothrow) RenderBuffer();
+  if (!buffer)
     log_and_abort("[ RENDER ] init: failed create screen buffer");
+  if (!buffer->create(w, h))
+    log_and_abort("[ RENDER ] init: failed create screen buffer");
+
+  return buffer;
 }
 
-void deinit()
+void render_deinit()
 {
   assert(hout != INVALID_HANDLE_VALUE);
-  assert(screen.buf);
+  assert(buffer);
 
-  free(screen.buf);
-
-  screen.buf = nullptr;
-  hout       = INVALID_HANDLE_VALUE;
+  delete buffer;
+  buffer = nullptr;
+  hout   = INVALID_HANDLE_VALUE;
 }
 
-namespace buf {
+#pragma region Buffer
 
-void clear(const char c)
+bool RenderBuffer::create(const u32 w, const u32 h)
 {
-  assert(screen.buf);
+  assert(!data_);
+  assert(w && h);
 
-  for (u32 i = 0; i < screen.width * screen.height; i++)
-    screen.buf[i] = c;
+  data_ = static_cast<char *>(malloc(w * h));
+  if (!data_)
+    return false;
+  width_  = w;
+  height_ = h;
+
+  return true;
 }
 
-void show()
+void RenderBuffer::destroy() {
+  free(data_);
+  data_ = nullptr;
+}
+
+void RenderBuffer::clear(const char c)
+{
+  assert(data_);
+  for (u32 i = 0; i < width_ * height_; i++)
+    data_[i] = c;
+}
+
+bool RenderBuffer::set(const u32 x, const u32 y, const char c)
+{
+  assert(data_);
+
+  if (x >= width_ || y >= height_)
+    return false;
+  data_[y * width_ + x] = c;
+
+  return true;
+}
+
+void RenderBuffer::show() const
 {
   assert(hout != INVALID_HANDLE_VALUE);
-  assert(screen.buf);
+  assert(data_);
 
   const char s[] = "\033[0;0H";
 
   WriteConsoleA(hout, s, sizeof(s), nullptr, nullptr);
-  WriteConsoleA(hout, screen.buf, screen.width * screen.height, nullptr, nullptr);
+  WriteConsoleA(hout, data_, width_ * height_, nullptr, nullptr);
 }
 
-void set(const u32 x, const u32 y, const char c)
-{
-  assert(screen.buf);
-
-  if (x >= screen.width || y >= screen.height)
-    return;
-
-  screen.buf[y * screen.width + x] = c;
-}
-
-} /* namespace buf */
+#pragma endregion
 
 } /* namespace */
