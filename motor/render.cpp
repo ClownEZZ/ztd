@@ -20,6 +20,12 @@ RenderBuffer *render_init()
   if (hout == INVALID_HANDLE_VALUE)
     log_and_abort("[ RENDER ] init: failed get console handle");
 
+  CONSOLE_CURSOR_INFO ci;
+  if (GetConsoleCursorInfo(hout, &ci)) {
+    ci.bVisible = FALSE;
+    SetConsoleCursorInfo(hout, &ci);
+  }
+
   CONSOLE_SCREEN_BUFFER_INFO csbi;
   if (!GetConsoleScreenBufferInfo(hout, &csbi))
     log_and_abort("[ RENDER ] init: failed get console size");
@@ -39,6 +45,12 @@ void render_deinit()
 {
   assert(hout != INVALID_HANDLE_VALUE);
   assert(buffer);
+
+  CONSOLE_CURSOR_INFO ci;
+  if (GetConsoleCursorInfo(hout, &ci)) {
+    ci.bVisible = TRUE;
+    SetConsoleCursorInfo(hout, &ci);
+  }
 
   delete buffer;
   buffer = nullptr;
