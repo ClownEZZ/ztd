@@ -16,4 +16,6 @@ source = files(
   'motor/log.cpp'
 )
 
-executable('ztd', source)
+executable('ztd', source,
+  link_args: ['-lwinmm']
+)

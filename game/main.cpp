@@ -11,6 +11,14 @@ void draw_square(ztd::RenderBuffer *buf, const i32 x, const i32 y, const i32 r)
       buf->set(i, j, '@');
 }
 
+void draw_tps(ztd::RenderBuffer *buf, u8 n)
+{
+  for (i32 i = 2; i >= 0; i--) {
+    buf->set(i, 0, n % 10 + '0');
+    n /= 10;
+  }
+}
+
 int main()
 {
   ztd::RenderBuffer *buf;
@@ -23,8 +31,20 @@ int main()
   double anime = 0.0;
   i32 x, y = buf->height() / 2;
 
+  i64 last_tick   = ztd::get_tick();
+  u32 count_tps   = 0;
+  u32 current_tps = 0;
+
   for (;;) {
-    i64 start = ztd::get_tick();
+    i64 start_tick = ztd::get_tick();
+
+    if (start_tick - last_tick >= 10000000LL) {
+      current_tps = count_tps;
+      count_tps   = 0;
+      last_tick  += 10000000LL;
+    }
+
+    count_tps++;
 
     if (event.get())
       if (event.ch == 'q')
@@ -36,10 +56,11 @@ int main()
     anime += 0.1;
 
     buf->clear(' ');
+    draw_tps(buf, current_tps);
     draw_square(buf, x, y, 5);
     buf->show();
 
-    ztd::sleep_tps(start, 255);
+    ztd::sleep_tps(start_tick, 40);
   }
 
   ztd::timer_deinit();

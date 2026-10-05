@@ -10,12 +10,14 @@ static HANDLE htimer = nullptr;
 
 void timer_init() {
   assert(!htimer);
+  timeBeginPeriod(1);
   htimer = CreateWaitableTimerW(nullptr, TRUE, nullptr);
   if (htimer == nullptr)
     log_and_abort("[ TIMER ] init: failed");
 }
 
 void timer_deinit() {
+  timeEndPeriod(1);
   CloseHandle(htimer);
   htimer = nullptr;
 }
