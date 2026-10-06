@@ -1,8 +1,6 @@
 #include <math.h>
 
-#include "../motor/render.hpp"
-#include "../motor/input.hpp"
-#include "../motor/timer.hpp"
+#include "../motor/ztd-motor.hpp"
 
 void draw_square(ztd::RenderBuffer *buf, const i32 x, const i32 y, const i32 r)
 {
