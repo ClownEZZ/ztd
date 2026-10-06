@@ -1,64 +1,54 @@
-#include <math.h>
-
 #include "../motor/ztd-motor.hpp"
-
-void draw_square(ztd::RenderBuffer *buf, const i32 x, const i32 y, const i32 r)
-{
-  for (i32 i = x - r; i < x + r; i++)
-    for (i32 j = y - r; j < y + r; j++)
-      buf->set(i, j, '@');
-}
-
-void draw_tps(ztd::RenderBuffer *buf, u8 n)
-{
-  for (i32 i = 2; i >= 0; i--) {
-    buf->set(i, 0, n % 10 + '0');
-    n /= 10;
-  }
-}
 
 int main()
 {
   ztd::RenderBuffer *buf;
-  ztd::InputEvent    event;
+  ztd::InputEvent event;
 
   buf = ztd::render_init();
   ztd::input_init();
   ztd::timer_init();
 
-  double anime = 0.0;
-  i32 x, y = buf->height() / 2;
+  ztd::Map map(500, 300);
+  map.clear(ztd::Block { '-', false });
 
-  i64 last_tick   = ztd::get_tick();
-  u32 count_tps   = 0;
-  u32 current_tps = 0;
+  bool run = true;
+  struct {
+    i64 x, y;
+  } cum = { 0, 0 };
+  const i32 w = buf->width();
+  const i32 h = buf->height();
 
-  for (;;) {
-    i64 start_tick = ztd::get_tick();
-
-    if (start_tick - last_tick >= 10000000LL) {
-      current_tps = count_tps;
-      count_tps   = 0;
-      last_tick  += 10000000LL;
+  while (run) {
+    if (event.wait()) {
+      switch (event.code) {
+      case 'Q': run = false; break;
+      case 'A': cum.x--; break;
+      case 'D': cum.x++; break;
+      case 'W': cum.y--; break;
+      case 'S': cum.y++; break;
+      }
     }
 
-    count_tps++;
-
-    if (event.get())
-      if (event.ch == 'q')
-        break;
-
-    if (anime > 100.0)
-      anime -= 100.0;
-    x = buf->width()  / 2 + 20 * cos(anime);
-    anime += 0.1;
-
     buf->clear(' ');
-    draw_tps(buf, current_tps);
-    draw_square(buf, x, y, 5);
-    buf->show();
 
-    ztd::sleep_tps(start_tick, 40);
+    i64 x  = cum.x - w / 2;
+    i64 xb = 0;
+    while (x <= cum.x + w / 2) {
+      i64 y  = cum.y - h / 2;
+      i64 yb = 0;
+      while (y <= cum.y + h / 2) {
+        ztd::Block b = map.get(x, y);
+        if (b.ch == 0)
+          buf->set(xb, yb, '#');
+        else
+          buf->set(xb, yb, b.ch);
+        y++; yb++;
+      }
+      x++; xb++;
+    }
+
+    buf->show();
   }
 
   ztd::timer_deinit();
