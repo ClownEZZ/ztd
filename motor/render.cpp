@@ -15,7 +15,7 @@ RenderBuffer *render_init()
 
   hout = GetStdHandle(STD_OUTPUT_HANDLE);
   if (hout == INVALID_HANDLE_VALUE)
-    log_and_abort("[ RENDER ] init: failed get console handle");
+    log_n_abort("failed get console handle");
 
   CONSOLE_CURSOR_INFO ci;
   if (GetConsoleCursorInfo(hout, &ci)) {
@@ -25,13 +25,13 @@ RenderBuffer *render_init()
 
   CONSOLE_SCREEN_BUFFER_INFO csbi;
   if (!GetConsoleScreenBufferInfo(hout, &csbi))
-    log_and_abort("[ RENDER ] init: failed get console size");
+    log_n_abort("failed get console size");
   const u32 w = csbi.srWindow.Right  - csbi.srWindow.Left + 1;
   const u32 h = csbi.srWindow.Bottom - csbi.srWindow.Top  + 1;
 
   buffer = new(std::nothrow) RenderBuffer(w, h);
   if (!buffer)
-    log_and_abort("[ RENDER ] init: failed create screen buffer");
+    log_n_abort("failed create screen buffer");
 
   return buffer;
 }

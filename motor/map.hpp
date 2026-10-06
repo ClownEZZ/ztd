@@ -53,7 +53,7 @@ ZTD_INLINE Map::Map(const u32 w, const u32 h)
 
   data_ = static_cast<Block *>(malloc(sizeof(Block) * w * h));
   if (!data_)
-    log_and_abort("[ MAP ] Map::Map(): no mem");
+    log_n_abort("no mem");
   width_  = w;
   height_ = h;
 }

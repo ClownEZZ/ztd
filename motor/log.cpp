@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <time.h>
+#include <source_location>
 
 namespace ztd {
 
@@ -20,8 +21,10 @@ static void log_(const char *s, ...)
   fclose(f);
 }
 
-void log(const char *s)
-{
+void log(
+  const char *s,
+  const std::source_location loc
+) {
   const time_t fucking_date = time(nullptr);
   if (fucking_date == -1)
     log_("time: %s\n", strerror(errno));
@@ -31,22 +34,27 @@ void log(const char *s)
 
   if (date && fucking_date != -1) {
     log_(
-      "%d-%02d-%02d %02d:%02d:%02d  %s\n",
+      "%d-%02d-%02d %02d:%02d:%02d  %s  %s: %s\n",
       date->tm_year + 1900,
       date->tm_mon  + 1,
       date->tm_mday,
       date->tm_hour,
       date->tm_min,
       date->tm_sec,
+      loc.file_name(),
+      loc.function_name(),
       s
     );
   }
   else
-    log_("%s\n", s);
+    log_("%s  %s: %s\n", loc.file_name(), loc.function_name(), s);
 }
 
-void log_and_abort(const char *s) {
-  log(s);
+void log_n_abort(
+  const char *s,
+  const std::source_location loc
+) {
+  log(s, loc);
   abort();
 }
 

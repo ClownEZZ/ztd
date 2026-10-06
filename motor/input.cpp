@@ -14,7 +14,7 @@ void input_init()
 
   hin = GetStdHandle(STD_INPUT_HANDLE);
   if (hin == INVALID_HANDLE_VALUE)
-    log_and_abort("[ INPUT ] init: failed get console handle");
+    log_n_abort("failed get console handle");
 }
 
 bool InputEvent::get()
