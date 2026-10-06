@@ -1,5 +1,11 @@
 #pragma once
 
+#ifndef NDEBUG
+  #define ZTD_INLINE inline
+#else
+  #define ZTD_INLINE inline __attribute__((always_inline))
+#endif
+
 #include <stdint.h>
 
 using i8  = int8_t;
