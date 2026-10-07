@@ -65,10 +65,10 @@ int main()
 
     i64 x  = cum.x - w / 2;
     i64 xb = 0;
-    while (x <= cum.x + w / 2) {
+    while (xb < w) {
       i64 y  = cum.y - h / 2;
       i64 yb = 0;
-      while (y <= cum.y + h / 2) {
+      while (yb < h) {
         ztd::Block b = map.get(x, y);
         if (b.ch == 0)
           buf->set(xb, yb, ' ');
