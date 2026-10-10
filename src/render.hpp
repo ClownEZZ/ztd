@@ -52,7 +52,11 @@ ZTD_INLINE void RenderBuffer::set(const u32 x, const u32 y, const char c)
   data_[y * width_ + x] = c;
 }
 
+/**
+ * В случае неудачи вызывает abort
+ */
 RenderBuffer *render_init();
-void          render_deinit();
+
+void render_deinit();
 
 } /* namespace */

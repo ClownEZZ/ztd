@@ -4,6 +4,9 @@
 
 namespace ztd {
 
+/**
+ * Записывает строку, место вызова и время вызова в ztd-log.txt
+ */
 void log(
   const char *,
   const std::source_location loc = std::source_location::current()
